@@ -11,14 +11,14 @@ Import-Module msonline
 
 #Logging Function
 Function Write-Log {
-    Param ([string]$User="",[string]$Type="",[string]$Content)
+    Param ([string]$UserLog="",[string]$Type="",[string]$Content)
     $time = get-date -format "yyyy-MM-dd HH:mm:ss[ffffff]"
     [string]$Path=$PSScriptRoot+"\ActivationOffice365-"+$date+".log"
-    if ($User -eq "") {
+    if ($UserLog -eq "") {
         $Output = $time + ", " + $Type + " - " + $Content
     }
     else {
-        $Output = $time + ", " + $Type + " - " + $User + " : " + $Content
+        $Output = $time + ", " + $Type + " - " + $UserLog + " : " + $Content
     }
    Add-content -encoding utf8 -Path $Logfile -value $Output -ErrorAction SilentlyContinue
    write-host $Output
@@ -62,5 +62,13 @@ catch{
 
 foreach ($user in $users)
 {
+    try {
     New-MsolUser -UserPrincipalName $user.UserPrincipalName -DisplayName $_.Nom_Complet -FirstName $_.Prenom -LastName $_.Nom -MobilePhone $_.tel_mobile -Office $_.Bureau -PhoneNumber $_.Tel_bureau -Title $_.Fonction -UsageLocation FR -Country $_.Pays
+    }
+    catch {
+    $errorMessage = $_.Exception.Message
+    Write-log -Type "Error" -Contenu $errorMessage
+    Exit
+    }
+    Write-log -Type "Information" -UserLog "$user.UserPrincipalName" -Content "Cree sur Office365"
 }
