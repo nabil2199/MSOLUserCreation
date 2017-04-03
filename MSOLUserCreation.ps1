@@ -5,13 +5,9 @@ OCWS
 BSD 3-Clause License
 #>
 
-param([string]$userCsv = "C:\Sources\users.csv")
+param([string]$userCsv = "C:\Sources\users.csv",[string]$MSOLUser = $null,[string]$MSOLPassword = $null)
 
 Import-Module msonline
-
-#Office365 session
-$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $UserCredential -Authentication Basic -AllowRedirection
-Import-PSSession $Session 
 
 #Logging Function
 Function Write-Log {
@@ -28,6 +24,28 @@ Function Write-Log {
    write-host $Output
 }
 
+#Office365 connection
+try {
+    if($MSOLUser -ne $null -and $MSOLPassword -ne $null)
+    {
+        $secpasswd = ConvertTo-SecureString $MSOLPassword -AsPlainText -Force
+        $MsolCred = New-Object System.Management.Automation.PSCredential ($MSOLUser,$MSOLPassword)
+        Connect-MsolService -cred $MsolCred
+        Write-log -Type "Information" -Contenu "Connecté au service Office 365"   
+    }
+    else
+    {
+        $MsolCred = Get-Credential -Message "Identifiant Office 365"
+        Connect-MsolService -cred $MsolCred
+        Write-log -Type "Information" -Contenu "Connecté au service Office 365"
+    }
+    }
+catch {
+    $errorMessage = $_.Exception.Message
+    Write-log -Type "Error" -Contenu $errorMessage
+    Exit
+    }
+
 #Chargement du fichier utilisateur
 try{
     $users = $null
@@ -42,3 +60,7 @@ catch{
     Exit
 }
 
+foreach ($user in $users)
+{
+    
+}
