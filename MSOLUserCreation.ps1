@@ -62,5 +62,5 @@ catch{
 
 foreach ($user in $users)
 {
-    
+    New-MsolUser -UserPrincipalName $user.UserPrincipalName -DisplayName $_.Nom_Complet -FirstName $_.Prenom -LastName $_.Nom -MobilePhone $_.tel_mobile -Office $_.Bureau -PhoneNumber $_.Tel_bureau -Title $_.Fonction -UsageLocation FR -Country $_.Pays
 }
